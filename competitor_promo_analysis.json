@@ -1,0 +1,2787 @@
+{
+  "name": "Competitor Promo Analysis",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -352,
+        -48
+      ],
+      "id": "1e1cac5a-c57b-4376-96f7-104d49a4d3df",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Loop Over Items').item.json.page }}",
+        "options": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.jinaAi",
+      "typeVersion": 1,
+      "position": [
+        176,
+        80
+      ],
+      "id": "aab7d444-4f20-4728-a890-dba1fc0622e7",
+      "name": "Read URL content",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "jinaAiApi": {
+          "id": "",
+          "name": "Jina AI account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "86856b38-7606-4b91-b7fc-177275bfe84a",
+              "name": "page",
+              "value": "={{$json.data.metadata.url}}",
+              "type": "string"
+            },
+            {
+              "id": "451d9bf2-87c0-4406-b704-ad35eb9c0ecb",
+              "name": "content",
+              "value": "={{ $json.data?.markdown ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "cba02216-cd64-415a-9c7e-b632f92766e3",
+              "name": "checked_at",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "0710d79f-855f-4028-b8db-a77e4b406c31",
+              "name": "company",
+              "value": "={{ $('Loop Over Items').first().json.company ?? '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        208,
+        -128
+      ],
+      "id": "d5bd511f-2b46-42e2-9467-838584d7906c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ebc48bdc-1ef3-4931-a6ed-bfc3bac5fa6b",
+              "leftValue": "={{ $json.comparison_status }}",
+              "rightValue": "first_check",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "b45d5971-74c7-4e10-aba3-0ba507e045ef",
+              "leftValue": "={{ $json.comparison_status }}",
+              "rightValue": "changed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        720,
+        -32
+      ],
+      "id": "006aea83-bce2-4f2e-a671-f4ee3c9ba135",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_DOCUMENT_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_SPREADSHEET_NAME",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Websites",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "page": "={{ $json.page }}",
+            "changes_log": "={{ $json.comparison_status }}",
+            "checked_at": "={{ $json.checked_at }}"
+          },
+          "matchingColumns": [
+            "page"
+          ],
+          "schema": [
+            {
+              "id": "company",
+              "displayName": "company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "page",
+              "displayName": "page",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "checked_at",
+              "displayName": "checked_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "changes_log",
+              "displayName": "changes_log",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        976,
+        -80
+      ],
+      "id": "14042f27-7f69-4308-b5a3-aa1f6da4e29f",
+      "name": "Запись статуса changed, first_check",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gemma4:31b",
+        "options": {
+          "temperature": 0.2,
+          "topK": 64,
+          "topP": 1,
+          "format": "default"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        -64
+      ],
+      "id": "51a0db30-cdd1-46ef-b891-0fce8eae24ad",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.page }}",
+        "requestOptions": {}
+      },
+      "type": "@mendable/n8n-nodes-firecrawl.firecrawl",
+      "typeVersion": 1.1,
+      "position": [
+        -288,
+        176
+      ],
+      "id": "f9d050ca-5aa3-4c09-ad27-ae09be20a9b8",
+      "name": "Scrape URL",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "firecrawlApi": {
+          "id": "",
+          "name": "Firecrawl account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "641ee145-fc13-457f-b48a-940905b4f34f",
+              "leftValue": "={{ \n  ($json.data?.markdown ?? '')\n    .replace(/[-\\s]/g, '')\n    .length > 0\n}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        16,
+        -16
+      ],
+      "id": "9164b6b2-0728-4e78-96ea-5d4ab50880ae",
+      "name": "если md непустой"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "76a9ef1d-a885-44bb-9b0d-315bb02a0976",
+              "leftValue": "={{ Number($json.data?.metadata?.statusCode ?? 0) }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -128,
+        176
+      ],
+      "id": "1dfd87d9-fd59-4532-a685-7fc775742a95",
+      "name": "если http status 200"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "86856b38-7606-4b91-b7fc-177275bfe84a",
+              "name": "page",
+              "value": "={{$json.url}}",
+              "type": "string"
+            },
+            {
+              "id": "451d9bf2-87c0-4406-b704-ad35eb9c0ecb",
+              "name": "content",
+              "value": "={{ $json.data?.markdown ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "cba02216-cd64-415a-9c7e-b632f92766e3",
+              "name": "checked_at",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "4768a7f7-05f8-49a4-9161-bb2cfb27d648",
+              "name": "company",
+              "value": "={{ $('Loop Over Items').first().json.company ?? '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        320,
+        80
+      ],
+      "id": "0fab840b-27f9-433d-b2e6-d0611312ebf5",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        496,
+        -608
+      ],
+      "id": "a9717706-9031-49ba-af38-3c1c76208281",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        320,
+        -624
+      ],
+      "id": "66f611d4-460c-4314-a25f-76150bf808fc",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "model": "gemma4:31b",
+        "options": {
+          "temperature": 0.2,
+          "topK": 64,
+          "topP": 1,
+          "format": "default"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        672,
+        -448
+      ],
+      "id": "ed23a7d5-926b-4a61-bd92-53c8a25c00b5",
+      "name": "Ollama Chat Model1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Шаг 1. Парсинг сайтов",
+        "height": 912,
+        "width": 4064
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -896,
+        -448
+      ],
+      "typeVersion": 1,
+      "id": "9813d808-917b-4b47-8ae8-e95705216e49",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Шаг 2. Обогащение базы",
+        "height": 416,
+        "width": 1680,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -240,
+        -736
+      ],
+      "typeVersion": 1,
+      "id": "2b85b661-0203-4f10-8711-a0ff783e7fb2",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                4
+              ],
+              "triggerAtHour": 11,
+              "triggerAtMinute": 5
+            }
+          ]
+        }
+      },
+      "id": "422b87e6-7cdc-42b4-8e47-bf92d8d64a49",
+      "name": "Каждый понедельник",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -768,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Нода \"Метрики\": считает всё детерминированно, LLM потом только пишет текст.\n// Конкурент попадает в сравнение только если снимок получен и на этой, и на прошлой неделе.\nconst rows = $input.all().map(i => i.json).filter(r => r.competitor && r.week);\n\nconst norm = s => String(s ?? '').trim().toLowerCase();\nconst unk = v => ['', 'unknown'].includes(norm(v));\nconst r1 = n => (n == null ? null : Math.round(n * 10) / 10);\nconst med = a => {\n  if (!a.length) return null;\n  const s = [...a].sort((x, y) => x - y), h = Math.floor(s.length / 2);\n  return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2;\n};\n// максимальный % в тексте скидки; \"10% бонусами\" и т.п. скидкой не считаем\nconst parsePct = d => {\n  const t = String(d ?? '');\n  if (/бонус/i.test(t)) return null;\n  const m = t.match(/\\d+(?:[.,]\\d+)?\\s*%/g);\n  return m ? Math.max(...m.map(x => parseFloat(x.replace(',', '.')))) : null;\n};\nconst count = (arr, f) => arr.reduce((a, r) => { const k = r[f] || 'unknown'; a[k] = (a[k] || 0) + 1; return a; }, {});\nconst nurl = u => String(u ?? '').trim().toLowerCase()\n  .replace(/^https?:\\/\\//, '').replace(/^www\\./, '').replace(/[?#].*$/, '').replace(/\\/+$/, '');\nconst isoWeek = (yyyy, mm, dd) => {\n  const d = new Date(Date.UTC(yyyy, mm - 1, dd));\n  const day = d.getUTCDay() || 7;\n  d.setUTCDate(d.getUTCDate() + 4 - day);\n  const y = d.getUTCFullYear();\n  return `${y}-W${String(Math.ceil(((d - Date.UTC(y, 0, 1)) / 86400000 + 1) / 7)).padStart(2, '0')}`;\n};\n\nfor (const r of rows) {\n  r.brand_n = String(r.brand ?? '').trim().toUpperCase();\n  // ключ акции: по нему определяем новые/завершённые между неделями\n  r.key = [norm(r.competitor), norm(r.title), r.brand_n].join('|');\n  r.pct = parsePct(r.discount);\n}\n\n// ---- недели: текущая = неделя запуска, прошлая = последняя более ранняя в базе ----\nconst cur = $now.toFormat(\"kkkk-'W'WW\");\nconst weeks = [...new Set(rows.map(r => r.week))].sort();\nif (!weeks.includes(cur)) throw new Error(`Нет снимков за неделю ${cur}: ни один сайт не дал данных. Проверьте листы Errors и Websites.`);\nconst older = weeks.filter(w => w < cur);\nif (!older.length) throw new Error('Нужно минимум два снимка (колонка week), найдено: ' + weeks.length);\nconst prev = older.at(-1);\nconst W = w => rows.filter(r => r.week === w);\nconst A_all = W(cur), B_all = W(prev);\n\n// ---- что не удалось собрать на этой неделе (лист Errors) ----\nlet sites = [], errRows = [];\ntry { sites = $('Чтение список сайтов / Лист Websites').all().map(i => i.json).filter(r => r.page); } catch (e) { sites = []; }\ntry { errRows = $('Чтение Errors').all().map(i => i.json).filter(r => r.url && r.checked_at); } catch (e) { errRows = []; }\n\nconst siteCompany = {};\nfor (const s of sites) siteCompany[nurl(s.page)] = String(s.company ?? '').trim();\nfor (const r of rows) if (!siteCompany[nurl(r.url)]) siteCompany[nurl(r.url)] = r.competitor;\n\nconst weekOfTs = ts => { const m = String(ts).match(/^(\\d{4})-(\\d{2})-(\\d{2})/); return m ? isoWeek(+m[1], +m[2], +m[3]) : ''; };\nconst pagesWithRows = new Set(A_all.map(r => nurl(r.url)));\nconst failedPages = {};\nfor (const e of errRows) {\n  const k = nurl(e.url);\n  if (weekOfTs(e.checked_at) !== cur) continue;\n  if (pagesWithRows.has(k)) continue;                    // страницу потом собрали успешно: ошибку игнорируем\n  failedPages[k] = {\n    url: e.url,\n    competitor: siteCompany[k] || k.split('/')[0],\n    status: String(e.httpstatus ?? '').trim() || 'ошибка',\n    note: String(e.title ?? '').trim().slice(0, 120),\n  };\n}\n\nconst competitors = [...new Set([...rows.map(r => r.competitor), ...Object.values(failedPages).map(p => p.competitor)])];\nconst STATUS_RU = { no_snapshot: 'снимок не получен', incomplete: 'снимок неполный', no_baseline: 'нет снимка за прошлую неделю' };\nconst coverageBy = {};\nfor (const c of competitors) {\n  const pages = Object.values(failedPages).filter(p => p.competitor === c);\n  const hasCur = A_all.some(r => r.competitor === c), hasPrev = B_all.some(r => r.competitor === c);\n  let status = 'ok', reason = '';\n  if (!hasCur) { status = 'no_snapshot'; reason = pages.length ? pages.map(p => `${p.status}`).join(', ') : 'нет данных за неделю'; }\n  else if (pages.length) { status = 'incomplete'; reason = 'часть страниц не получена: ' + pages.map(p => p.status).join(', '); }\n  else if (!hasPrev) { status = 'no_baseline'; reason = `нет данных за ${prev}`; }\n  coverageBy[c] = { status, status_ru: STATUS_RU[status] ?? '', reason, pages };\n}\nconst comparable = competitors.filter(c => coverageBy[c].status === 'ok');\nconst coverage = {\n  run_week: cur, compared_with: prev, comparable,\n  problems: competitors.filter(c => coverageBy[c].status !== 'ok').map(c => ({ competitor: c, ...coverageBy[c] })),\n};\n\n// ---- сравнение: только конкуренты с полным снимком на обеих неделях ----\nconst A = A_all.filter(r => comparable.includes(r.competitor));\nconst B = B_all.filter(r => comparable.includes(r.competitor));\nconst kc = new Set(A.map(r => r.key)), kp = new Set(B.map(r => r.key));\nconst newPromos = A.filter(r => !kp.has(r.key));\nconst endedPromos = B.filter(r => !kc.has(r.key));\n\nconst byCompetitor = {};\nfor (const c of competitors) {\n  const cov = coverageBy[c];\n  const a = A_all.filter(r => r.competitor === c), b = B_all.filter(r => r.competitor === c);\n  if (cov.status !== 'ok') {\n    byCompetitor[c] = { comparable: false, status: cov.status, status_ru: cov.status_ru, reason: cov.reason, total_cur: a.length, total_prev: b.length };\n    continue;\n  }\n  const pcts = a.map(r => r.pct).filter(x => x != null);\n  const known = a.filter(r => !unk(r.price_segment));\n  byCompetitor[c] = {\n    comparable: true,\n    total_cur: a.length, total_prev: b.length,\n    new: a.filter(r => !kp.has(r.key)).length,\n    ended: b.filter(r => !kc.has(r.key)).length,\n    types_cur: count(a, 'promotion_type'), types_prev: count(b, 'promotion_type'),\n    mechanics_cur: count(a, 'promotion_mechanic'), mechanics_prev: count(b, 'promotion_mechanic'),\n    short_term_cur: a.filter(r => r.duration_type === 'short_term').length,\n    short_term_prev: b.filter(r => r.duration_type === 'short_term').length,\n    discount_depth: { n: pcts.length, mean: r1(pcts.length ? pcts.reduce((s, x) => s + x, 0) / pcts.length : null), median: med(pcts), max: pcts.length ? Math.max(...pcts) : null },\n    segments_known: known.length,\n    premium_luxe_share: known.length ? r1(known.filter(r => ['premium', 'luxe'].includes(r.price_segment)).length / known.length * 100) : null,\n  };\n}\n\nconst types = [...new Set(rows.map(r => r.promotion_type || 'unknown'))];\nconst kpi = {\n  total: { cur: A.length, prev: B.length },\n  new: newPromos.length, ended: endedPromos.length,\n  share_new_pct: A.length ? r1(newPromos.length / A.length * 100) : null,\n  short_term: { cur: A.filter(r => r.duration_type === 'short_term').length, prev: B.filter(r => r.duration_type === 'short_term').length },\n  types: Object.fromEntries(types.map(t => [t, { cur: A.filter(r => (r.promotion_type || 'unknown') === t).length, prev: B.filter(r => (r.promotion_type || 'unknown') === t).length }])),\n};\n\n// бренды, у которых есть акции минимум у двух конкурентов в текущем снимке\nconst brandMap = {};\nfor (const r of A_all) {\n  if (['MULTIPLE', 'UNKNOWN', ''].includes(r.brand_n)) continue;\n  (brandMap[r.brand_n] ??= {})[r.competitor] = [r.promotion_mechanic, r.discount].filter(Boolean).join(' ');\n}\nconst brand_overlap = Object.entries(brandMap).filter(([, v]) => Object.keys(v).length >= 2).map(([brand, by]) => ({ brand, by_competitor: by }));\n\nconst slim = r => ({ competitor: r.competitor, title: r.title, brand: r.brand, discount: r.discount || null, mechanic: r.promotion_mechanic, type: r.promotion_type });\nconst top_discounts = A_all.filter(r => r.pct != null).sort((x, y) => y.pct - x.pct).slice(0, 5).map(slim);\n\nconst share = (arr, f) => (arr.length ? r1(arr.filter(r => unk(r[f])).length / arr.length * 100) : 0);\nconst quality = {\n  rows_cur: A_all.length,\n  unknown_segment_pct: share(A_all, 'price_segment'),\n  unknown_category_pct: share(A_all, 'product_category'),\n  unknown_duration_pct: share(A_all, 'duration_type'),\n  brand_multiple_or_unknown_pct: r1(A_all.filter(r => ['MULTIPLE', 'UNKNOWN', ''].includes(r.brand_n)).length / A_all.length * 100),\n  high_confidence_pct: r1(A_all.filter(r => r.confidence === 'high').length / A_all.length * 100),\n  by_competitor_unknown_segment_pct: Object.fromEntries(competitors.filter(c => A_all.some(r => r.competitor === c)).map(c => [c, share(A_all.filter(r => r.competitor === c), 'price_segment')])),\n};\n\nreturn [{\n  json: {\n    weeks_total: weeks.length, cur_week: cur, prev_week: prev,\n    cur_date: A_all[0]?.date ?? null, prev_date: B_all[0]?.date ?? null,\n    competitors, coverage, kpi, byCompetitor, brand_overlap, top_discounts,\n    new_promos: newPromos.slice(0, 20).map(slim),\n    ended_promos: endedPromos.slice(0, 20).map(slim),\n    quality,\n    notes: [\n      'Новая/завершённая акция определяется по связке конкурент+заголовок+бренд.',\n      'Глубина скидки: максимальный % из текста; проценты бонусами не учитываются; \"до -60%\" это потолок, а не фикс.',\n      'В сравнение входят только конкуренты с полным снимком на обеих неделях.',\n    ],\n  },\n}];\n"
+      },
+      "id": "7dbacef8-4a62-4c04-939c-66ce48e1e1e1",
+      "name": "Метрики",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        -1104
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Метрики за {{ $json.prev_week }} и {{ $json.cur_week }} (JSON):\n{{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Ты эксперт по Competitive Intelligence в бьюти-ритейле. Тебе дают JSON с уже посчитанными метриками промо-активности конкурентов за две соседние недели.\nПравила:\n1. Используй только числа из JSON. Ничего не пересчитывай и не придумывай.\n2. Если снимков мало (weeks_total < 4) или выборка по конкуренту маленькая, прямо скажи, что тренд предварительный.\n3. Если в quality доля неопределённых значений выше 40%, не делай выводов по сегментам, категориям и срокам.\n4. Пиши по-русски, коротко, с числами: что изменилось, у кого, почему это важно.\n5. summary: 1-2 предложения с главным сдвигом. insights: 3-5 пунктов вида «что произошло, число, значение». threats и opportunities: по 2-3 пункта для нашей коммерческой команды.\n6. Если coverage.problems не пуст, начни summary с предупреждения, у каких конкурентов не получен снимок и почему. Для таких конкурентов не делай выводов и никогда не пиши, что их акции закончились или что они свернули активность: данных просто нет. Сравнивай только конкурентов из coverage.comparable."
+            }
+          ]
+        }
+      },
+      "id": "82e984b1-c659-4754-a750-ae69bb4d7889",
+      "name": "Выводы",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        912,
+        -1104
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"summary\": {\n      \"type\": \"string\",\n      \"description\": \"1-2 предложения с главным сдвигом\"\n    },\n    \"insights\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"threats\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"opportunities\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    }\n  },\n  \"required\": [\n    \"summary\",\n    \"insights\"\n  ]\n}"
+      },
+      "id": "6c233a74-1d18-4a6f-9217-73a6e24833fc",
+      "name": "Схема ответа",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1072,
+        -928
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Нода \"Собрать HTML\": подставляет метрики и текст LLM в письмо\nconst m = $('Метрики').first().json;\nlet ai = $input.first().json.output ?? $input.first().json;\nif (typeof ai === 'string') { try { ai = JSON.parse(ai); } catch (e) { ai = { summary: ai, insights: [] }; } }\n\n// LLM не ответила: отправляем отчёт с расчётными таблицами, без текстовых выводов\nif (!ai || typeof ai !== 'object' || !ai.summary) {\n  ai = { summary: 'Текстовые выводы недоступны: модель не вернула ответ. Ниже расчётные показатели.', insights: [] };\n}\n\nconst esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nconst delta = (c, p) => { const d = c - p; return d > 0 ? '+' + d : String(d); };\nconst TYPE_RU = { price: 'Цена', gift: 'Подарок', loyalty: 'Лояльность', bundle: 'Набор', service: 'Сервис', other: 'Прочее', unknown: 'Не определено' };\nconst td = 'padding:6px 10px;border-bottom:1px solid #e5e5e5;';\nconst th = 'padding:6px 10px;border-bottom:2px solid #999;text-align:left;font-weight:600;';\nconst table = (head, body) =>\n  `<table style=\"border-collapse:collapse;font-size:14px;margin:8px 0 16px\">` +\n  `<tr>${head.map(h => `<th style=\"${th}\">${esc(h)}</th>`).join('')}</tr>` +\n  body.map(r => `<tr>${r.map(c => `<td style=\"${td}\">${esc(c)}</td>`).join('')}</tr>`).join('') + `</table>`;\nconst ul = a => (a && a.length ? `<ul>${a.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '');\n\n// KPI\nconst kpiRows = [\n  ['Акций в снимке', m.kpi.total.prev, m.kpi.total.cur, delta(m.kpi.total.cur, m.kpi.total.prev)],\n  ...['price', 'gift', 'loyalty'].filter(t => m.kpi.types[t]).map(t => [TYPE_RU[t], m.kpi.types[t].prev, m.kpi.types[t].cur, delta(m.kpi.types[t].cur, m.kpi.types[t].prev)]),\n  ['Краткосрочные', m.kpi.short_term.prev, m.kpi.short_term.cur, delta(m.kpi.short_term.cur, m.kpi.short_term.prev)],\n];\n\n// оборот акций\nconst churnRows = m.competitors.map(c => {\n  const x = m.byCompetitor[c];\n  if (x.comparable === false) return [c, x.total_prev || '-', x.total_cur || '-', '-', '-', x.status_ru + (x.reason ? ' (' + x.reason + ')' : '')];\n  return [c, x.total_prev, x.total_cur, x.new, x.ended, x.total_cur ? Math.round(x.new / x.total_cur * 100) + '%' : '-'];\n});\nconst okCompetitors = m.competitors.filter(c => m.byCompetitor[c].comparable !== false);\n\n// график: структура типов акций по конкурентам (текущая неделя), QuickChart\nconst mixTypes = ['price', 'gift', 'loyalty'];\nconst mix = okCompetitors.map(c => {\n  const x = m.byCompetitor[c], tot = x.total_cur || 1;\n  const row = Object.fromEntries(mixTypes.map(t => [t, Math.round((x.types_cur[t] || 0) / tot * 100)]));\n  row.other = Math.max(0, 100 - mixTypes.reduce((s, t) => s + row[t], 0));\n  return row;\n});\nconst colors = { price: '#2a78d6', gift: '#c9c8c0', loyalty: '#dfdfd8', other: '#eeeeea' };\nconst chartCfg = {\n  type: 'bar',\n  data: {\n    labels: okCompetitors,\n    datasets: [...mixTypes, 'other'].map(t => ({ label: TYPE_RU[t === 'other' ? 'other' : t], data: mix.map(r => r[t]), backgroundColor: colors[t] })),\n  },\n  options: {\n    indexAxis: 'y',\n    plugins: { title: { display: true, text: 'Структура акций по типам, % (неделя ' + m.cur_week + ')' }, legend: { position: 'bottom' } },\n    scales: { x: { stacked: true, max: 100 }, y: { stacked: true } },\n  },\n};\nconst chartUrl = 'https://quickchart.io/chart?w=700&h=300&bkg=white&c=' + encodeURIComponent(JSON.stringify(chartCfg));\n\n// механики: что изменилось\nconst mechRows = [];\nfor (const c of okCompetitors) {\n  const x = m.byCompetitor[c];\n  const keys = new Set([...Object.keys(x.mechanics_cur), ...Object.keys(x.mechanics_prev)]);\n  for (const k of keys) {\n    const cu = x.mechanics_cur[k] || 0, pr = x.mechanics_prev[k] || 0;\n    if (Math.abs(cu - pr) >= 2) mechRows.push([c, k, pr, cu, delta(cu, pr)]);\n  }\n}\nmechRows.sort((a, b) => Math.abs(b[4]) - Math.abs(a[4]));\n\n// глубина скидок\nconst depthRows = okCompetitors.map(c => { const d = m.byCompetitor[c].discount_depth; return [c, d.n, d.mean ?? '-', d.median ?? '-', d.max ?? '-']; });\n\n// пересечения брендов\nconst overlapRows = m.brand_overlap.slice(0, 12).map(o => [o.brand, ...m.competitors.map(c => o.by_competitor[c] || '-')]);\n\n// качество данных\nconst q = m.quality;\nconst qualityWarn = q.unknown_segment_pct > 40 || q.unknown_category_pct > 40 || q.unknown_duration_pct > 40;\n\n\n// предупреждение о неполных данных\nconst probs = (m.coverage && m.coverage.problems) || [];\nconst bannerHtml = probs.length ? `<div style=\"border:1px solid #c33;background:#fff4f4;padding:10px 14px;margin:12px 0;border-radius:4px\">\n<b>Внимание: данные за неделю неполные.</b>\n<ul style=\"margin:6px 0 0\">${probs.map(p => `<li><b>${esc(p.competitor)}</b>: ${esc(p.status_ru)}${p.reason ? ' (' + esc(p.reason) + ')' : ''}${p.pages && p.pages.length ? '. Страницы: ' + p.pages.map(x => esc(x.url) + ' — ' + esc(x.status) + (x.note ? ', ' + esc(x.note) : '')).join('; ') : ''}</li>`).join('')}</ul>\n<p style=\"margin:6px 0 0;color:#555;font-size:13px\">Такие конкуренты не участвуют в сравнении: их отсутствие в данных не означает, что акции закончились. В показателях учтены: ${esc((m.coverage.comparable || []).join(', ') || 'никто')}.</p></div>` : '';\n\nconst html = `\n<div style=\"font-family:Arial,Helvetica,sans-serif;max-width:760px;color:#222;line-height:1.45\">\n<h1 style=\"font-size:22px\">Competitive Intelligence: промо конкурентов, ${esc(m.cur_week)}</h1>\n<p style=\"color:#666\">Неделя ${esc(m.cur_week)} к ${esc(m.prev_week)}. Конкуренты: ${esc(m.competitors.join(', '))}.</p>\n\n${bannerHtml}\n<h2 style=\"font-size:18px\">Главное</h2>\n<p>${esc(ai.summary)}</p>\n${ul(ai.insights)}\n\n<h2 style=\"font-size:18px\">Динамика между снимками</h2>\n${table(['Показатель', m.prev_week, m.cur_week, 'Δ'], kpiRows)}\n<p>Новых акций: <b>${m.kpi.new}</b> (${m.kpi.share_new_pct}% текущего снимка), завершилось: <b>${m.kpi.ended}</b>.</p>\n${table(['Конкурент', 'Было', 'Стало', 'Новых', 'Завершились', 'Доля новых'], churnRows)}\n\n<h2 style=\"font-size:18px\">Структура акций</h2>\n<img src=\"${chartUrl}\" alt=\"Структура акций по типам\" style=\"max-width:100%\">\n\n${mechRows.length ? `<h2 style=\"font-size:18px\">Сдвиги механик</h2>${table(['Конкурент', 'Механика', m.prev_week, m.cur_week, 'Δ'], mechRows)}` : ''}\n\n<h2 style=\"font-size:18px\">Глубина скидок</h2>\n${table(['Конкурент', 'Акций с %', 'Средняя, %', 'Медиана, %', 'Максимум, %'], depthRows)}\n<p style=\"color:#666;font-size:13px\">«До −60%» это потолок на категорию, а не фиксированная скидка; проценты бонусами не учитываются.</p>\n\n${overlapRows.length ? `<h2 style=\"font-size:18px\">Один бренд у нескольких конкурентов</h2>${table(['Бренд', ...m.competitors], overlapRows)}` : ''}\n\n${ai.threats && ai.threats.length ? `<h2 style=\"font-size:18px\">Угрозы</h2>${ul(ai.threats)}` : ''}\n${ai.opportunities && ai.opportunities.length ? `<h2 style=\"font-size:18px\">Возможности</h2>${ul(ai.opportunities)}` : ''}\n\n<h2 style=\"font-size:18px\">Качество данных</h2>\n${qualityWarn ? '<p style=\"color:#b00\"><b>Внимание:</b> доля неопределённых значений выше 40%, выводы по сегментам, категориям и срокам ненадёжны.</p>' : ''}\n<p>Без сегмента: ${q.unknown_segment_pct}%, без категории: ${q.unknown_category_pct}%, без срока: ${q.unknown_duration_pct}%, бренд multiple/unknown: ${q.brand_multiple_or_unknown_pct}%, разметка с уверенностью high: ${q.high_confidence_pct}%. Снимков в базе: ${m.weeks_total}.</p>\n<p style=\"color:#666;font-size:13px\">${m.notes.map(esc).join('<br>')}</p>\n</div>`;\n\nreturn [{ json: { subject: `CI-отчёт: акции конкурентов, ${m.cur_week}`, html } }];\n"
+      },
+      "id": "d0ca7522-8690-40b7-beed-53d3ef943c3f",
+      "name": "Собрать HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        -1104
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "you@example.com",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "cf54d532-da71-44f7-a296-723026078e9c",
+      "name": "Отправить отчёт",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1504,
+        -1104
+      ],
+      "webhookId": "",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        912,
+        -928
+      ],
+      "id": "6e4a0918-3482-4116-ae53-c1093a901d04",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Шаг 3. Генерация отчета",
+        "height": 464,
+        "width": 1632,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        208,
+        -1216
+      ],
+      "typeVersion": 1,
+      "id": "8fab4e34-8590-4492-8748-e390bd972a75",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_DOCUMENT_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_SPREADSHEET_NAME",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Websites",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "page": "={{ $json.page }}",
+            "changes_log": "={{ $json.comparison_status }}",
+            "checked_at": "={{ $json.checked_at }}"
+          },
+          "matchingColumns": [
+            "page"
+          ],
+          "schema": [
+            {
+              "id": "company",
+              "displayName": "company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "page",
+              "displayName": "page",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "checked_at",
+              "displayName": "checked_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "changes_log",
+              "displayName": "changes_log",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        976,
+        128
+      ],
+      "id": "e26d50cc-a9dd-4995-9898-c483469b5780",
+      "name": "Запись статуса unchanged",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8984241a-b511-44cc-b5db-c122c7181a1a",
+              "leftValue": "={{ !$json.__skip }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "8c5dc0dc-2697-4c5e-b0a7-cf138bd28a70",
+      "name": "если есть что копировать",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1520,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_DOCUMENT_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_SPREADSHEET_NAME",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1116582825,
+          "mode": "list",
+          "cachedResultName": "Errors",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit#gid=1116582825"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "url": "={{ $('Loop Over Items').first().json.page }}",
+            "httpstatus": "={{ $json.data?.metadata?.statusCode ?? (typeof $json.error === 'string' ? $json.error : $json.error?.message) ?? 'unknown' }}",
+            "checked_at": "={{ $now.toISO() }}",
+            "title": "={{ $json.data?.metadata?.title ?? '' }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "httpstatus",
+              "displayName": "httpstatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "checked_at",
+              "displayName": "checked_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        48,
+        192
+      ],
+      "id": "79fede7d-734c-4414-a9aa-7056d4e718d7",
+      "name": "Запись ошибок парсинга / лист Errors",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Сравнение текущей версии страницы с прошлой. Источник текущей версии: Edit Fields1\nconst current = $('Edit Fields1').first().json;\nconst norm = t => String(t ?? '').replace(/\\s+/g, ' ').trim();\n\nconst rows = $input.all()\n  .map(item => item.json)\n  .filter(row => row.page === current.page && norm(row.content));\nrows.sort((a, b) => new Date(b.updatedAt ?? 0) - new Date(a.updatedAt ?? 0));\nconst previous = rows[0];\n\nlet comparison_status;\nif (!norm(current.content)) comparison_status = 'empty';              // страницу не удалось прочитать\nelse if (!previous) comparison_status = 'first_check';\nelse if (norm(current.content) === norm(previous.content)) comparison_status = 'unchanged';\nelse comparison_status = 'changed';\n\nreturn [{\n  json: {\n    page: current.page,\n    company: current.company,\n    checked_at: current.checked_at,\n    content: current.content,\n    previous_content: previous?.content ?? '',\n    comparison_status,\n    changed: comparison_status === 'changed'\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        80
+      ],
+      "id": "1ec9d247-251e-4566-a921-f073e0a4d445",
+      "name": "Текущая версия сайта vs прошлая"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Сравнение текущей версии страницы с прошлой. Источник текущей версии: Edit Fields\nconst current = $('Edit Fields').first().json;\nconst norm = t => String(t ?? '').replace(/\\s+/g, ' ').trim();\n\nconst rows = $input.all()\n  .map(item => item.json)\n  .filter(row => row.page === current.page && norm(row.content));\nrows.sort((a, b) => new Date(b.updatedAt ?? 0) - new Date(a.updatedAt ?? 0));\nconst previous = rows[0];\n\nlet comparison_status;\nif (!norm(current.content)) comparison_status = 'empty';              // страницу не удалось прочитать\nelse if (!previous) comparison_status = 'first_check';\nelse if (norm(current.content) === norm(previous.content)) comparison_status = 'unchanged';\nelse comparison_status = 'changed';\n\nreturn [{\n  json: {\n    page: current.page,\n    company: current.company,\n    checked_at: current.checked_at,\n    content: current.content,\n    previous_content: previous?.content ?? '',\n    comparison_status,\n    changed: comparison_status === 'changed'\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        -144
+      ],
+      "id": "4fe7494c-e3b1-413a-9c88-128dcfe4c332",
+      "name": "Текущая версия сайта vs прошлая1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Разбор ответа модели (шаг извлечения акций). Ошибка одной страницы не должна останавливать цикл.\n// Достаёт первый полный JSON из ответа модели (убирает ```json, терпит запятую перед } и ])\nfunction extractJson(raw) {\n  if (raw !== null && typeof raw === 'object') return raw;\n  if (typeof raw !== 'string') throw new Error('Поле output отсутствует или не является строкой');\n  const text = raw.trim().replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```\\s*$/i, '').trim();\n  const start = text.search(/[\\[{]/);\n  if (start === -1) throw new Error(`В ответе модели не найден JSON. Ответ: ${text.slice(0, 300)}`);\n  const stack = [];\n  let inString = false, escaped = false, end = -1;\n  for (let i = start; i < text.length; i++) {\n    const ch = text[i];\n    if (inString) {\n      if (escaped) escaped = false;\n      else if (ch === '\\\\') escaped = true;\n      else if (ch === '\"') inString = false;\n      continue;\n    }\n    if (ch === '\"') { inString = true; continue; }\n    if (ch === '{' || ch === '[') stack.push(ch);\n    else if (ch === '}' || ch === ']') {\n      const open = stack.pop();\n      if ((ch === '}' && open !== '{') || (ch === ']' && open !== '[')) throw new Error('Некорректная структура JSON');\n      if (stack.length === 0) { end = i + 1; break; }\n    }\n  }\n  if (end === -1) throw new Error(`JSON не завершён. Ответ: ${text.slice(0, 300)}`);\n  const jsonText = text.slice(start, end);\n  try { return JSON.parse(jsonText); }\n  catch (e1) {\n    try { return JSON.parse(jsonText.replace(/,(\\s*[}\\]])/g, '$1')); }\n    catch (e2) { throw new Error(`Ошибка разбора JSON: ${e1.message}. Фрагмент: ${jsonText.slice(0, 300)}`); }\n  }\n}\n\nconst out = [];\nfor (const item of $input.all()) {\n  try {\n    const j = item.json;\n    if (j.output === undefined || j.output === null || j.output === '') {\n      const e = j.error;\n      throw new Error('Нет ответа модели' + (e ? ': ' + (typeof e === 'string' ? e : (e.message ?? JSON.stringify(e))) : ''));\n    }\n    const data = extractJson(j.output);\n    if (!data || Array.isArray(data) || (!('promotions' in data))) {\n      throw new Error('В ответе нет поля promotions');\n    }\n    out.push({ json: {\n      competitor: data.competitor ?? '',\n      promotions: Array.isArray(data.promotions) ? data.promotions : [],\n    } });\n  } catch (e) {\n    out.push({ json: { promotions: [],__error: String(e.message).slice(0, 300) } });\n  }\n}\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1616,
+        -272
+      ],
+      "id": "cc50077e-bc06-45ac-9ae2-16abc7fc70c7",
+      "name": "Разбор ответа модели"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Строки для записи в Promos. Служебные поля берём из таблицы Websites и из часов, а не из ответа модели.\nconst loop = $('Loop Over Items').first().json;\nconst page = loop.page;\nconst company = String(loop.company ?? '').trim();\nconst date = $now.toFormat('dd.MM.yyyy');\nconst week = $now.toFormat(\"kkkk-'W'WW\");\n// id строки: неделя + хэш содержимого. Стабилен, уникален в пределах недели, не зависит от состояния таблицы.\nconst hash = s => {\n  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;\n  for (let i = 0; i < s.length; i++) {\n    const c = s.charCodeAt(i);\n    h1 = Math.imul(h1 ^ c, 2654435761);\n    h2 = Math.imul(h2 ^ c, 1597334677);\n  }\n  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);\n  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);\n  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);\n};\nconst seenKeys = {};\nconst makeId = parts => {            // одинаковые строки на странице различаются счётчиком\n  const key = parts.join('|');\n  seenKeys[key] = (seenKeys[key] || 0) + 1;\n  return `${week}-${hash(key + '|' + seenKeys[key])}`;\n};\nconst str = v => (v === null || v === undefined) ? '' : String(v);\n\nconst result = [];\nfor (const item of $input.all()) {\n  const data = item.json;\n\n  if (data.__error) {\n    result.push({ json: { type: 'error', url: page, error_message: data.__error } });\n    continue;\n  }\n  const competitor = company || str(data.competitor);\n\n  for (const promotion of (data.promotions ?? [])) {\n    const row = {\n      type: 'promotion', competitor, date, week, url: page,\n      title: str(promotion.title),\n      description: str(promotion.description),\n      discount: str(promotion.discount),\n      deadline: str(promotion.deadline),\n      products: Array.isArray(promotion.products) ? promotion.products.join(', ') : str(promotion.products),\n      price: '', category: ''\n    };\n    row.promo_id = makeId([row.competitor, page, row.title, row.description, row.discount, row.deadline, row.products]);\n    result.push({ json: row });\n  }\n}\n\n// Страница без акций: возвращаем метку, иначе цикл не пойдёт дальше\nif (result.length === 0) result.push({ json: { type: 'empty', url: page, error_message: 'Модель не нашла акций на странице' } });\nreturn result;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1840,
+        -272
+      ],
+      "id": "4cd215a1-962f-45ce-9fa1-1ed093f8f8c2",
+      "name": "Подготовка строк для записи"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_DOCUMENT_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_SPREADSHEET_NAME",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1116582825,
+          "mode": "list",
+          "cachedResultName": "Errors",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit#gid=1116582825"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "url": "={{ $('Loop Over Items').first().json.page }}",
+            "httpstatus": "extraction_error",
+            "checked_at": "={{ $now.toISO() }}",
+            "title": "={{ String($json.error_message ?? \"\").slice(0, 200) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "httpstatus",
+              "displayName": "httpstatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "checked_at",
+              "displayName": "checked_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2224,
+        -160
+      ],
+      "id": "a5d91d56-3b87-4b37-b07e-bee7fe3ba7dd",
+      "name": "Запись extraction error / лист Errors",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 60
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2928,
+        208
+      ],
+      "id": "efea6551-62f9-41fc-895d-a9fb31d749cb",
+      "name": "Wait 60 сек",
+      "webhookId": ""
+    },
+    {
+      "parameters": {
+        "jsCode": "// Страница не изменилась (или не прочиталась): переносим акции прошлого снимка в текущую неделю без вызова LLM\nconst page = $('Loop Over Items').first().json.page;\nconst date = $now.toFormat('dd.MM.yyyy');\nconst week = $now.toFormat(\"kkkk-'W'WW\");\n\n// id строки: неделя + хэш содержимого. Стабилен, уникален в пределах недели, не зависит от состояния таблицы.\nconst hash = s => {\n  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;\n  for (let i = 0; i < s.length; i++) {\n    const c = s.charCodeAt(i);\n    h1 = Math.imul(h1 ^ c, 2654435761);\n    h2 = Math.imul(h2 ^ c, 1597334677);\n  }\n  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);\n  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);\n  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);\n};\nconst seenKeys = {};\nconst makeId = parts => {            // одинаковые строки на странице различаются счётчиком\n  const key = parts.join('|');\n  seenKeys[key] = (seenKeys[key] || 0) + 1;\n  return `${week}-${hash(key + '|' + seenKeys[key])}`;\n};\n\nconst nurl = u => String(u ?? '').trim().toLowerCase()\n  .replace(/^https?:\\/\\//, '').replace(/^www\\./, '').replace(/[?#].*$/, '').replace(/\\/+$/, '');\nconst snap = r => {                      // ключ снимка для сортировки: дата, иначе неделя\n  const m = String(r.date ?? '').match(/^(\\d{2})\\.(\\d{2})\\.(\\d{4})$/);\n  return m ? `${m[3]}${m[2]}${m[1]}` : String(r.week ?? '');\n};\n\nconst rows = $input.all().map(i => i.json).filter(r => r.title && nurl(r.url) === nurl(page));\nif (!rows.length) return [{ json: { __skip: true, reason: 'no_previous_rows', page } }];\n\nconst last = rows.map(snap).sort().at(-1);\nconst prev = rows.filter(r => snap(r) === last);\nif (prev.some(r => r.week === week)) return [{ json: { __skip: true, reason: 'already_current_week', page } }];\n\nconst FIELDS = ['competitor', 'title', 'description', 'discount', 'deadline', 'products', 'brand',\n  'price_segment', 'product_name', 'product_category', 'promotion_type', 'promotion_mechanic',\n  'duration_type', 'confidence', 'classification_notes'];\n\nreturn prev.map(r => {\n  const row = { ...Object.fromEntries(FIELDS.map(f => [f, String(r[f] ?? '')])), date, week, url: page };\n  row.promo_id = makeId([row.competitor, page, row.title, row.description, row.discount, row.deadline, row.products]);\n  return { json: row };\n});\n"
+      },
+      "id": "85aa0932-8275-4393-8959-b36e7b2ca6c7",
+      "name": "Копия прошлого снимка",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// В обогащение идут только строки без разметки. Размеченные (в том числе скопированные) не трогаем.\nconst rows = $input.all()\n  .map(i => i.json)\n  .filter(r => String(r.promo_id ?? '').trim() !== '' && String(r.title ?? '').trim() !== '')\n  .filter(r => String(r.promotion_type ?? '').trim() === '');\n\nif (rows.length === 0) return [{ json: { __none: true } }];\nreturn rows.map(json => ({ json }));\n"
+      },
+      "id": "0c2a5a01-d95f-42d2-9071-faa0aa2e6836",
+      "name": "Определяем, для каких строк нужно обогащение",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -32,
+        -624
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4478c81e-c1f6-49e2-ae07-632582639831",
+              "leftValue": "={{ !$json.__none }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "94f2cc32-c971-46d4-9403-639445d6c7a2",
+      "name": "если есть что обогащать",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        128,
+        -624
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_DOCUMENT_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_SPREADSHEET_NAME",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Websites",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -576,
+        -48
+      ],
+      "id": "d0e1f3a2-55cd-47ad-a526-06463476c676",
+      "name": "Чтение список сайтов / Лист Websites",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_DOCUMENT_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_SPREADSHEET_NAME",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 105650315,
+          "mode": "list",
+          "cachedResultName": "Promos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit#gid=105650315"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1168,
+        128
+      ],
+      "id": "2b9c5e33-50d9-43b0-867d-3ae479a5a88f",
+      "name": "Чтение прошлого снимка / лист Promos",
+      "retryOnFail": true,
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_DOCUMENT_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_SPREADSHEET_NAME",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 105650315,
+          "mode": "list",
+          "cachedResultName": "Promos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit#gid=105650315"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "promo_id": "={{ $json.promo_id }}",
+            "competitor": "={{ $json.competitor }}",
+            "date": "={{ $json.date }}",
+            "week": "={{ $json.week }}",
+            "url": "={{ $json.url }}",
+            "title": "={{ $json.title }}",
+            "description": "={{ $json.description }}",
+            "discount": "={{ $json.discount }}",
+            "deadline": "={{ $json.deadline }}",
+            "products": "={{ $json.products }}",
+            "brand": "={{ $json.brand }}",
+            "price_segment": "={{ $json.price_segment }}",
+            "product_name": "={{ $json.product_name }}",
+            "product_category": "={{ $json.product_category }}",
+            "promotion_type": "={{ $json.promotion_type }}",
+            "promotion_mechanic": "={{ $json.promotion_mechanic }}",
+            "duration_type": "={{ $json.duration_type }}",
+            "confidence": "={{ $json.confidence }}",
+            "classification_notes": "={{ $json.classification_notes }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "promo_id",
+              "displayName": "promo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "competitor",
+              "displayName": "competitor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "week",
+              "displayName": "week",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "discount",
+              "displayName": "discount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "deadline",
+              "displayName": "deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "products",
+              "displayName": "products",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "brand",
+              "displayName": "brand",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "price_segment",
+              "displayName": "price_segment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "product_name",
+              "displayName": "product_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "product_category",
+              "displayName": "product_category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "promotion_type",
+              "displayName": "promotion_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "promotion_mechanic",
+              "displayName": "promotion_mechanic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "duration_type",
+              "displayName": "duration_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "confidence",
+              "displayName": "confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "classification_notes",
+              "displayName": "classification_notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1744,
+        112
+      ],
+      "id": "cae6168f-a0e2-4f26-9bee-4b7e83555249",
+      "name": "Запись промо прошлой недели в список на текущую / лист Promos",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_DOCUMENT_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_SPREADSHEET_NAME",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 105650315,
+          "mode": "list",
+          "cachedResultName": "Promos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit#gid=105650315"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "promo_id": "={{ $json.promo_id }}",
+            "url": "={{ $json.url }}",
+            "competitor": "={{ $json.competitor }}",
+            "date": "={{ $json.date }}",
+            "week": "={{ $json.week }}",
+            "title": "={{ $json.title }}",
+            "description": "={{ $json.description }}",
+            "discount": "={{ $json.discount }}",
+            "deadline": "={{ $json.deadline }}",
+            "products": "={{ $json.products }}"
+          },
+          "matchingColumns": [
+            "url"
+          ],
+          "schema": [
+            {
+              "id": "promo_id",
+              "displayName": "promo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "competitor",
+              "displayName": "competitor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "week",
+              "displayName": "week",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "discount",
+              "displayName": "discount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "deadline",
+              "displayName": "deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "products",
+              "displayName": "products",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2224,
+        -416
+      ],
+      "id": "a55c4697-5634-41f4-9e68-6514749add3d",
+      "name": "Запись новые промо / лист Promos",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "YOUR_N8N_DATA_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Competitor websites",
+          "cachedResultUrl": "/projects/YOUR_N8N_PROJECT_ID/datatables/YOUR_N8N_DATA_TABLE_ID"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "page",
+              "keyValue": "={{ $json.page }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        -144
+      ],
+      "id": "904e6b19-3e6d-451f-9d7d-e9d74be41555",
+      "name": "Чтение прошлые данные парсинга в data table1",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "YOUR_N8N_DATA_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Competitor websites",
+          "cachedResultUrl": "/projects/YOUR_N8N_PROJECT_ID/datatables/YOUR_N8N_DATA_TABLE_ID"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "page",
+              "keyValue": "={{ $json.page }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        464,
+        80
+      ],
+      "id": "d2636f34-1f8a-4941-83e2-71b45664a29f",
+      "name": "Чтение прошлые данные парсинга в data table",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "YOUR_N8N_DATA_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Competitor websites",
+          "cachedResultUrl": "/projects/YOUR_N8N_PROJECT_ID/datatables/YOUR_N8N_DATA_TABLE_ID"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "page",
+              "keyValue": "={{ $json.page }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "content": "={{ $json.content }}",
+            "page": "={{ $json.page }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "page",
+              "displayName": "page",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        976,
+        -272
+      ],
+      "id": "ae092120-aba6-435a-bb54-c1bfbe6f2d59",
+      "name": "Обновление content в data table",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "YOUR_N8N_DATA_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Competitor websites",
+          "cachedResultUrl": "/projects/YOUR_N8N_PROJECT_ID/datatables/YOUR_N8N_DATA_TABLE_ID"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "page",
+              "keyValue": "={{ $('Loop Over Items').first().json.page }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "page": "={{ $('Loop Over Items').first().json.page }}",
+            "content": ""
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "page",
+              "displayName": "page",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2416,
+        -160
+      ],
+      "id": "aa844805-29fe-4c03-8c9e-1b43e1e3854c",
+      "name": "Обновление content в data table (повторить на след. неделе)",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_DOCUMENT_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_SPREADSHEET_NAME",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 105650315,
+          "mode": "list",
+          "cachedResultName": "Promos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit#gid=105650315"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -224,
+        -624
+      ],
+      "id": "752f7ba5-9803-4640-8539-a31669abb62c",
+      "name": "Чтение промо / лист Promos",
+      "retryOnFail": true,
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Достаёт первый полный JSON из ответа модели (убирает ```json, терпит запятую перед } и ])\nfunction extractJson(raw) {\n  if (raw !== null && typeof raw === 'object') return raw;\n  if (typeof raw !== 'string') throw new Error('Поле output отсутствует или не является строкой');\n  const text = raw.trim().replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```\\s*$/i, '').trim();\n  const start = text.search(/[\\[{]/);\n  if (start === -1) throw new Error(`В ответе модели не найден JSON. Ответ: ${text.slice(0, 300)}`);\n  const stack = [];\n  let inString = false, escaped = false, end = -1;\n  for (let i = start; i < text.length; i++) {\n    const ch = text[i];\n    if (inString) {\n      if (escaped) escaped = false;\n      else if (ch === '\\\\') escaped = true;\n      else if (ch === '\"') inString = false;\n      continue;\n    }\n    if (ch === '\"') { inString = true; continue; }\n    if (ch === '{' || ch === '[') stack.push(ch);\n    else if (ch === '}' || ch === ']') {\n      const open = stack.pop();\n      if ((ch === '}' && open !== '{') || (ch === ']' && open !== '[')) throw new Error('Некорректная структура JSON');\n      if (stack.length === 0) { end = i + 1; break; }\n    }\n  }\n  if (end === -1) throw new Error(`JSON не завершён. Ответ: ${text.slice(0, 300)}`);\n  const jsonText = text.slice(start, end);\n  try { return JSON.parse(jsonText); }\n  catch (e1) {\n    try { return JSON.parse(jsonText.replace(/,(\\s*[}\\]])/g, '$1')); }\n    catch (e2) { throw new Error(`Ошибка разбора JSON: ${e1.message}. Фрагмент: ${jsonText.slice(0, 300)}`); }\n  }\n}\n\n// Ответ модели не разобрался: пишем пустую разметку и причину. Строка останется без promotion_type\n// и попадёт в обогащение на следующем запуске, а цикл не остановится.\nconst failed = msg => ({\n  promo_id: '', price_segment: '', brand: '', product_name: '', product_category: '',\n  promotion_type: '', promo_mechanic: '', duration_type: '', confidence: '',\n  classification_notes: ('ERROR: ' + msg).slice(0, 300)\n});\n\nconst result = [];\nfor (const item of $input.all()) {\n  let data;\n  try {\n    const j = item.json;\n    if (j.output === undefined || j.output === null || j.output === '') {\n      const e = j.error;\n      throw new Error('Нет ответа модели' + (e ? ': ' + (typeof e === 'string' ? e : (e.message ?? JSON.stringify(e))) : ''));\n    }\n    data = extractJson(j.output);\n  } catch (e) {\n    result.push({ json: failed(e.message) });\n    continue;\n  }\n\n  const promos = Array.isArray(data) ? data : [data];\n  for (const promo of promos) {\n    result.push({\n      json: {\n        promo_id: promo.promo_id ?? '',\n        price_segment: promo.price_segment ?? '',\n        brand: promo.brand ?? '',\n        product_name: promo.product_name ?? '',\n        product_category: promo.product_category ?? '',\n        promotion_type: promo.promotion_type ?? '',\n        promo_mechanic: promo.promo_mechanic ?? '',\n        duration_type: promo.duration_type ?? '',\n        confidence: promo.confidence ?? '',\n        classification_notes: promo.classification_notes ?? ''\n      }\n    });\n  }\n}\nreturn result;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        -608
+      ],
+      "id": "20208891-beb7-446c-b960-fd6e562ecf82",
+      "name": "Разбор ответа модели_2"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_DOCUMENT_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_SPREADSHEET_NAME",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 105650315,
+          "mode": "list",
+          "cachedResultName": "Promos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit#gid=105650315"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "promo_id": "={{ $('Loop Over Items1').item.json.promo_id }}",
+            "brand": "={{ $json.brand }}",
+            "product_name": "={{ $json.product_name }}",
+            "product_category": "={{ $json.product_category }}",
+            "promotion_type": "={{ $json.promotion_type }}",
+            "promotion_mechanic": "={{ $json.promo_mechanic }}",
+            "duration_type": "={{ $json.duration_type }}",
+            "classification_notes": "={{ $json.classification_notes }}",
+            "confidence": "={{ $json.confidence }}",
+            "price_segment": "={{ $json.price_segment }}"
+          },
+          "matchingColumns": [
+            "promo_id"
+          ],
+          "schema": [
+            {
+              "id": "promo_id",
+              "displayName": "promo_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "competitor",
+              "displayName": "competitor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "discount",
+              "displayName": "discount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "deadline",
+              "displayName": "deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "products",
+              "displayName": "products",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "brand",
+              "displayName": "brand",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "price_segment",
+              "displayName": "price_segment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "product_name",
+              "displayName": "product_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "product_category",
+              "displayName": "product_category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "promotion_type",
+              "displayName": "promotion_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "promotion_mechanic",
+              "displayName": "promotion_mechanic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "duration_type",
+              "displayName": "duration_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "confidence",
+              "displayName": "confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "classification_notes",
+              "displayName": "classification_notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1136,
+        -608
+      ],
+      "id": "7afe2adb-500f-4f5c-b07e-1cf47a810984",
+      "name": "Запись ответа модели",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1296,
+        -608
+      ],
+      "id": "b753c61b-6893-4bb6-b8d5-97faac367139",
+      "name": "Wait 15 сек",
+      "webhookId": ""
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Проанализируй содержимое веб-страницы конкурента и извлеки \nмаркетинговую информацию.\n\nURL: {{ $json.page }}\nДата анализа: {{ $now.format('dd.MM.yyyy') }}\n\nСодержимое страницы:\n{{ $json.content }}\n\n---\n\nВерни ответ строго в формате JSON:\n\n{\n  \"competitor\": \"название компании\",\n  \"url\": \"url страницы\",\n  \"date\": \"дата анализа\",\n\n  \"promotions\": [\n    {\n      \"title\": \"название акции или скидки\",\n      \"description\": \"краткое описание\",\n      \"discount\": \"размер скидки или условие (если указано)\",\n      \"deadline\": \"срок действия (если указан, иначе null)\",\n      \"products\": [\"продукт 1\", \"продукт 2\"]\n    }\n  ],\n\n  \"found_promotions\": true\n}\n\nПравила заполнения:\n- Если акций нет — \"promotions\": []\n- Флаг found_promotions ставь true только если есть реальные данные\n- Все суммы и скидки указывай точно как на странице, не округляй\n- Если информация неоднозначная — не включай её",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Ты — аналитик конкурентной разведки для бренд-менеджера.\n\nТвоя задача: анализировать веб-страницы конкурентов и извлекать информацию о промоактивностях. Работай только с теми данными, которые явно присутствуют на странице. Не додумывай и не интерпретируй то, чего нет в тексте.\n\nФормат ответа — строго JSON, без пояснений и markdown-обёртки."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1248,
+        -272
+      ],
+      "id": "27cb16ba-0dfd-46e5-8318-116fd2ecbce9",
+      "name": "Анализ веб-страниц",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Input: {{ JSON.stringify($json.data, null, 2) }}.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Ты ассистент по извлечению информации. Твоя задача: анализировать промоакции и извлекать структурированную информацию.\n\nВерни только JSON по схеме.\n\n1. Извлечение бренда и продукта\n\nОпредели:\n\nbrand — бренд, участвующий в акции;\n\nproduct_name — конкретный продукт, если он указан;\n\nproduct_category — категорию продукта;\n\ncategory_confidence — уверенность в классификации.\n\nИспользуй следующие категории:\n\nskincare;\n\nbody_care;\n\nhaircare;\n\nmakeup;\n\nparfume;\n\nhygiene;\n\nsun_care;\n\nbeauty_tools;\n\nsets — наборы;\n\nmultiple_categories — несколько категорий;\n\nother — другая категория;\n\nunknown — данных недостаточно.\n\nЕсли в акции участвуют продукты нескольких категорий, укажи multiple_categories.\n\nНе принимай название магазина за название бренда. Если акция распространяется на множество брендов, укажи brand = multiple.\n\n2. Классификация типа акции\n\nОпредели для каждой акции один promotion_type:\n\nprice - ценовые. Пример: До −50% на парфюмерию.\n\ngift - подарочные. Пример: Косметичка при покупке Clinique от 6 000 ₽.\n\nbundle — комплектные. Пример: 3-й продукт в чеке бесплатно. \n\nloyalty - лояльность. Промокоды, кэшбэки.\n\nservice - сервисные.\n\n3. Классификация по механике.\n\nОпредели одну основную механику promo_mechanic:\n\nЕсли promotion_type = price:\n\nbrand_discount - прямая скидка на выделенный ассортимент бренда. Пример: −30% на всю декоративную косметику Maybelline.\n\ncategory_discount - скидка на конкретную категорию без указания бренда или мультибренд. Пример: До −50% на парфюмерию.\n\nkvi - фиксированная супер-цена на бестселлеры. Пример: Тушь Lash Sensational за 499 ₽ вместо 890 ₽\n\nthreshold - снижение цены при достижении порога в корзине. Пример: Скидка 1 000 ₽ при покупке от 4 000 ₽ по промокоду.\n\nЕсли promotion_type = gift:\n\ngwp - физический подарок при покупке бренда/категории.\n\nminis - набор семплов/делюкс-миниатюр за покупку. Пример: 3 сэмпла на выбор при покупке Erborian.\n\nЕсли promotion_type = bundle:\n\nmulti-buy - бесплатный продукт с наименьшей стоимостью. Пример: 3-й продукт в чеке бесплатно.\n\nBOGO - Готовые сеты или покупка «Главный + Сопутствующий». Пример: Купи сыворотку — получи тоник со скидкой 50%.\n\nЕсли promotion_type = loyalty:\n\npromo_code — промокод. Пример: Дополнительные −15% по промокоду BEAUTY\n\nbonus - начисление повышенных баллов/кэшбэка. Пример: Кэшбэк 30% бонусами на K-Beauty.\n\ncontest — конкурс или розыгрыш. Пример: Купи продукцию Vivienne Sabo от 1 500 ₽ и выиграй поездку в Париж.\n\nЕсли нет подходящего типа, напиши other — другой тип.\n\nЕсли данных недостаточно, напиши unknown — недостаточно данных.\n\n4. Определение длительности\n\nВыбери duration_type:\n\nshort_term — краткосрочная;\n\nlong_term — долгосрочная;\n\nunknown — определить нельзя.\n\nПравила:\n\nИспользуй даты начала и окончания, если они указаны.\n\nЕсли срок действия явно ограничен несколькими днями или конкретным коротким периодом до 14 календарных дней включительно, классифицируй как short_term.\n\nЕсли явно указан длительный период действия, больше 14 дней - классифицируй как long_term.\n\nЕсли акция не имеет указанного срока действия, не считай её автоматически долгосрочной.\n\nЕсли дата окончания отсутствует и длительность нельзя установить, укажи unknown.\n\nПорог между краткосрочной и долгосрочной акцией: до 14 календарных дней включительно — short_term; больше 14 дней — long_term. Применяй порог только при наличии достаточных дат или явно указанного срока.\n\n5. Ценовой сегмент\n\nВыбери сегмент, если определен бренд:\n\nluxe. Примеры брендов: Chanel, Dior, Guerlain, Givenchy, Lancôme, YSL, Tom Ford. \npremium. Примеры брендов: Biologique Recherche, Estée Lauder, Clinique, Clarins.\nmiddle. Примеры брендов: Pupa, Bourjois, NYX, L'Oréal Paris La Roche-Posay.\neconom. Примеры брендов: Maybelline, Vivienne Sabó, Catrice, Garnier.\n\n6. Качество классификации\n\nДля каждого основного вывода укажи confidence: high, medium или low.\n\nЕсли данные противоречат друг другу или недостаточны, используй unknown и запиши причину в classification_notes.\n\nФормат результата\n\nВерни только валидный JSON без Markdown и пояснений вне JSON по схеме:\n \n{\n\"promo_id\": \"\",\n\"brand\": \"\",\n\"price_segment\": \"\",\n\"product_name\": \"\",\n\"product_category\": \"\",\n\"promotion_type\": \"\",\n\"promo_mechanic\": \"\",\n\"duration_type\": \"\",\n\"confidence\": \"high, medium или low\",\n\"classification_notes\": \"\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        672,
+        -608
+      ],
+      "id": "2285f2da-919b-422d-8218-518c3690af4c",
+      "name": "Классификация промо",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_DOCUMENT_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_SPREADSHEET_NAME",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 105650315,
+          "mode": "list",
+          "cachedResultName": "Promos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit#gid=105650315"
+        },
+        "options": {}
+      },
+      "id": "9629ade4-9d24-4a98-be4d-d667a7b71f4f",
+      "name": "Чтение промо / лист Promos_после обогащения",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        464,
+        -1104
+      ],
+      "executeOnce": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "919b2c1e-fed9-4956-b4b0-64830bc40ac6",
+              "leftValue": "={{ $json.type }}",
+              "rightValue": "promotion",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2016,
+        -272
+      ],
+      "id": "87a6527c-2c3a-4bff-ac04-a19b8bd67417",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_DOCUMENT_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_SPREADSHEET_NAME",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1116582825,
+          "mode": "list",
+          "cachedResultName": "Errors",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEETS_DOCUMENT_ID/edit#gid=1116582825"
+        },
+        "options": {}
+      },
+      "id": "182bd8fa-7ccd-4488-a624-a8ffdc719484",
+      "name": "Чтение Errors",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        288,
+        -1104
+      ],
+      "executeOnce": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Чтение промо / лист Promos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Scrape URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read URL content": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Чтение прошлые данные парсинга в data table1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Запись статуса changed, first_check",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Обновление content в data table",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Запись статуса unchanged",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Анализ веб-страниц",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape URL": {
+      "main": [
+        [
+          {
+            "node": "если http status 200",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "если md непустой": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Read URL content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "если http status 200": {
+      "main": [
+        [
+          {
+            "node": "если md непустой",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Запись ошибок парсинга / лист Errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Чтение прошлые данные парсинга в data table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Классификация промо",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Чтение Errors",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Классификация промо",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Каждый понедельник": {
+      "main": [
+        [
+          {
+            "node": "Чтение список сайтов / Лист Websites",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Метрики": {
+      "main": [
+        [
+          {
+            "node": "Выводы",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Схема ответа": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Выводы",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Выводы": {
+      "main": [
+        [
+          {
+            "node": "Собрать HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Собрать HTML": {
+      "main": [
+        [
+          {
+            "node": "Отправить отчёт",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Выводы",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Запись статуса unchanged": {
+      "main": [
+        [
+          {
+            "node": "Чтение прошлого снимка / лист Promos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "если есть что копировать": {
+      "main": [
+        [
+          {
+            "node": "Запись промо прошлой недели в список на текущую / лист Promos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 60 сек",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Запись ошибок парсинга / лист Errors": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Текущая версия сайта vs прошлая": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Текущая версия сайта vs прошлая1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Разбор ответа модели": {
+      "main": [
+        [
+          {
+            "node": "Подготовка строк для записи",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Подготовка строк для записи": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Запись extraction error / лист Errors": {
+      "main": [
+        [
+          {
+            "node": "Обновление content в data table (повторить на след. неделе)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 60 сек": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Копия прошлого снимка": {
+      "main": [
+        [
+          {
+            "node": "если есть что копировать",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Определяем, для каких строк нужно обогащение": {
+      "main": [
+        [
+          {
+            "node": "если есть что обогащать",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Чтение список сайтов / Лист Websites": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Чтение прошлого снимка / лист Promos": {
+      "main": [
+        [
+          {
+            "node": "Копия прошлого снимка",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Запись промо прошлой недели в список на текущую / лист Promos": {
+      "main": [
+        [
+          {
+            "node": "Wait 60 сек",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Запись новые промо / лист Promos": {
+      "main": [
+        [
+          {
+            "node": "Wait 60 сек",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Чтение прошлые данные парсинга в data table1": {
+      "main": [
+        [
+          {
+            "node": "Текущая версия сайта vs прошлая1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Чтение прошлые данные парсинга в data table": {
+      "main": [
+        [
+          {
+            "node": "Текущая версия сайта vs прошлая",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Обновление content в data table": {
+      "main": [
+        [
+          {
+            "node": "Анализ веб-страниц",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Обновление content в data table (повторить на след. неделе)": {
+      "main": [
+        [
+          {
+            "node": "Wait 60 сек",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Чтение промо / лист Promos": {
+      "main": [
+        [
+          {
+            "node": "Определяем, для каких строк нужно обогащение",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "если есть что обогащать": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Чтение Errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Разбор ответа модели_2": {
+      "main": [
+        [
+          {
+            "node": "Запись ответа модели",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Запись ответа модели": {
+      "main": [
+        [
+          {
+            "node": "Wait 15 сек",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 15 сек": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Анализ веб-страниц": {
+      "main": [
+        [
+          {
+            "node": "Разбор ответа модели",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Классификация промо": {
+      "main": [
+        [
+          {
+            "node": "Разбор ответа модели_2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Чтение промо / лист Promos_после обогащения": {
+      "main": [
+        [
+          {
+            "node": "Метрики",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Запись новые промо / лист Promos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Запись extraction error / лист Errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Чтение Errors": {
+      "main": [
+        [
+          {
+            "node": "Чтение промо / лист Promos_после обогащения",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "nodeGroups": [],
+  "tags": []
+}

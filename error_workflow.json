@@ -1,0 +1,81 @@
+{
+  "name": "Error Workflow: оповещение о сбое CI-агента",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Как подключить\nВ основном workflow: Settings → Error Workflow → выберите этот workflow.\nGmail credentials выберите свои.",
+        "height": 140,
+        "width": 360,
+        "color": 4
+      },
+      "id": "7ad40ed5-9807-4f50-b8ac-670e86cca2a8",
+      "name": "Инструкция",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "7c03aada-0c9d-4147-94ab-11b8cd5a20b4",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        64,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "you@example.com",
+        "subject": "=Сбой: {{ $json.workflow.name }} — {{ $json.execution.lastNodeExecuted }}",
+        "message": "=<div style=\"font-family:Arial,sans-serif;font-size:14px\"><h2 style=\"color:#b00\">Ошибка в workflow: {{ $json.workflow.name }}</h2><p><b>Нода:</b> {{ $json.execution.lastNodeExecuted }}</p><p><b>Ошибка:</b> {{ $json.execution.error.message }}</p><p><b>Запуск:</b> <a href=\"{{ $json.execution.url }}\">{{ $json.execution.id }}</a> ({{ $json.execution.mode }})</p><p style=\"color:#666\">Если упал сбор, отчёт за эту неделю мог не уйти. Проверьте листы Errors и Promos.</p></div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "922216a1-b8ea-485a-9ee2-ea020757bb87",
+      "name": "Письмо об ошибке",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        208
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "webhookId": "",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Письмо об ошибке",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "nodeGroups": [],
+  "tags": []
+}
