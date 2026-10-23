@@ -25,7 +25,7 @@ Every week the agent:
 - A data quality block (share of unknown values)
 - A red warning when a site could not be collected, with the reason (for example HTTP 403). Such a competitor is excluded from the comparison, so a failed scrape is never read as "all promotions ended"
 
-<img width="800" height="450" alt="gif demo CI Report" src="https://github.com/user-attachments/assets/b54d38b2-d31c-4de8-b3bc-da99a7af4b5c" />
+<img width="640" height="360" alt="gif demo CI Report" src="https://github.com/user-attachments/assets/b54d38b2-d31c-4de8-b3bc-da99a7af4b5c" />
 
 ## How it works
 
